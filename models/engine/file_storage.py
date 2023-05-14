@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-This module contains the FileStorage class, which represents an abstracted storage engine.
+This module contains the FileStorage class,
+which represents an abstracted storage engine.
 """
 
 import json
