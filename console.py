@@ -193,6 +193,78 @@ class HBNBCommand(cmd.Cmd):
             objl = [str(obj) for obj in objdict.values()
                     if obj.__class__.__name__ == argl[0]]
         print(objl)
+    
+    def do_count(self, arg):
+        """
+        Retrieve the number of instances of a given class.
+
+        Usage: count <class> or <class>.count()
+
+        Args:
+            arg (str): The argument string containing the class name, if any.
+
+        """
+        argl = parse(arg)
+        count = sum(1 for obj in storage.all().values()
+                    if not argl or argl[0] == obj.__class__.__name__)
+        print(count)
+
+
+    def do_update(self, arg):
+        """
+        Update a class instance of a given id by adding or updating
+        a given attribute key/value pair or dictionary.
+
+        Usage: update <class> <id> <attribute_name> <attribute_value> or
+            <class>.update(<id>, <attribute_name>, <attribute_value>) or
+            <class>.update(<id>, <dictionary>)
+
+        Args:
+            arg (str): The argument string containing the class name, ID,
+                attribute name, and attribute value or dictionary.
+
+        """
+        argl = parse(arg)
+        objdict = storage.all()
+
+        if not argl:
+            print("** class name missing **")
+            return False
+        if argl[0] not in HBNBCommand.__classes:
+            print("** class doesn't exist **")
+            return False
+        if len(argl) == 1:
+            print("** instance id missing **")
+            return False
+        instance_key = "{}.{}".format(argl[0], argl[1])
+        if instance_key not in objdict.keys():
+            print("** no instance found **")
+            return False
+        if len(argl) == 2:
+            print("** attribute name missing **")
+            return False
+        if len(argl) == 3:
+            if not isinstance(eval(argl[2]), dict):
+                print("** value missing **")
+                return False
+
+        obj = objdict[instance_key]
+        if len(argl) == 4:
+            attribute_name, attribute_value = argl[2], argl[3]
+            if attribute_name in obj.__class__.__dict__.keys():
+                valtype = type(obj.__class__.__dict__[attribute_name])
+                obj.__dict__[attribute_name] = valtype(attribute_value)
+            else:
+                obj.__dict__[attribute_name] = attribute_value
+        elif isinstance(eval(argl[2]), dict):
+            for k, v in eval(argl[2]).items():
+                if (k in obj.__class__.__dict__.keys() and
+                        type(obj.__class__.__dict__[k]) in {str, int, float}):
+                    valtype = type(obj.__class__.__dict__[k])
+                    obj.__dict__[k] = valtype(v)
+                else:
+                    obj.__dict__[k] = v
+        storage.save()
 
 
 if __name__ == "__main__":
